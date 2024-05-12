@@ -16,11 +16,19 @@ typedef struct vector
     struct t_num *num_list;
 } VECTOR;
 
+
 double **read_from_file(FILE *, int *);
 void free_linked_mem(VECTOR *);
 double **mat_from_linked(VECTOR *, int, int);
-void error_alloc(VECTOR *);
+void error_alloc_link(VECTOR *);
 void print_matrix(double**, int, int);
+double similarity_calc(double*, double*, int);
+double **sym(double **, int, int);
+void free_mat_alloc(double **);
+double sum_of_vector(double*, int);
+double **ddg(double **, int, int);
+double **ddg_in_sequence(double **, int, int, double **);
+
 
 int main()
 {
@@ -28,7 +36,9 @@ int main()
     FILE *file;
     int n,d;
     double **data;
-    file = fopen("B:/code/software_project_final/symNMF-CPython/input_1.txt", "r");
+    double **sym_mat, **ddg_mat;
+
+    file = fopen("B:/code/software_project_final/symNMF-CPython/test_input.txt", "r");
     if (file == NULL)
     {
         printf("wtf");
@@ -37,9 +47,127 @@ int main()
     data = read_from_file(file, ND);
     n = ND[0];
     d = ND[1];
-    print_matrix(data, n, d);
-    printf("n is: %d\nd is: %d", ND[0], ND[1]);
+
+    sym_mat = sym(data, n, d);
+    print_matrix(sym_mat, n, n);
+
+    ddg_mat = ddg_in_sequence(data, n, d, sym_mat);
+    print_matrix(ddg_mat, n, n);
 }
+
+
+double **sym(double **data, int n, int d){
+    double **sym_mat;
+    double *rows;
+    int i,j;
+    /* allocate memory for matrix */
+    rows = (double *)calloc(n * n, sizeof(double));
+    if (rows == NULL)
+    {
+        free_mat_alloc(data);
+        printf("An Error Has Occurred\n");
+        exit(1);    
+    }
+    sym_mat = (double **)calloc(n, sizeof(double *));
+    if (sym_mat == NULL)
+    {
+        free(rows);
+        free_mat_alloc(data);
+        printf("An Error Has Occurred\n");
+        exit(1);
+    }
+    for (i = 0; i < n; i++)
+    {
+        sym_mat[i] = rows + i * n;
+    }
+    
+    for(i = 0; i < n; i++){
+        for(j = 0; j < n; j++){
+            sym_mat[i][j] = similarity_calc(data[i], data[j], d);
+        }
+    }
+    return sym_mat;
+}
+
+
+double **ddg(double **data, int n, int d){
+    double **ddg_mat;
+    double *rows;
+    int i,j;
+    /* allocate memory for matrix */
+    rows = (double *)calloc(n * n, sizeof(double));
+    if (rows == NULL)
+    {
+        return NULL;
+    }
+    ddg_mat = (double **)calloc(n, sizeof(double *));
+    if (ddg_mat == NULL)
+    {
+        free(rows);
+        return NULL;
+    }
+    for (i = 0; i < n; i++)
+    {
+        ddg_mat[i] = rows + i * n;
+    }
+    
+    for(i = 0; i < n; i++){
+        for(j = 0; j < n; j++){
+            if (i == j){
+                ddg_mat[i][j] = sum_of_vector(data[i], d);
+            }
+            else{
+                ddg_mat[i][j] = 0;
+            }
+        }
+    }
+    return ddg_mat;
+
+}
+
+
+double **ddg_in_sequence(double **data, int n, int d, double **sym_mat){
+    double **ddg_mat;
+    ddg_mat = ddg(data, n, d);
+    if (ddg_mat == NULL){
+        free_mat_alloc(sym_mat);
+        free_mat_alloc(data);
+        printf("An Error Has Occurred\n");
+        exit(1);
+    }
+    return ddg_mat;
+}
+
+
+double **norm(double **data, int n, int d, double **sym_mat, double **ddg_mat){
+    double **norm_mat;
+    double *rows;
+    int i,j;
+    /* allocate memory for matrix */
+    rows = (double *)calloc(n * d, sizeof(double));
+    if (rows == NULL)
+    {
+        return NULL;
+    }
+    norm_mat = (double **)calloc(n, sizeof(double *));
+    if (norm_mat == NULL)
+    {
+        free(rows);
+        return NULL;
+    }
+    for (i = 0; i < n; i++)
+    {
+        norm_mat[i] = rows + i * n;
+    }
+    
+    for(i = 0; i < n; i++){
+        for(j = 0; j < d; j++){
+            norm_mat[i][j];
+        }
+    }
+    return norm_mat;
+}
+
 
 double **read_from_file(FILE *file, int ND[2])
 {
@@ -89,7 +217,7 @@ double **read_from_file(FILE *file, int ND[2])
             if (curr_vec->next == NULL)
             {
                 fclose(file);
-                error_alloc(head_vec);
+                error_alloc_link(head_vec);
             }
             prev_vec = curr_vec;
             curr_vec = curr_vec->next;
@@ -98,7 +226,7 @@ double **read_from_file(FILE *file, int ND[2])
             if (curr_vec->num_list == NULL)
             {
                 fclose(file);
-                error_alloc(head_vec);
+                error_alloc_link(head_vec);
             }
             curr_num = curr_vec->num_list;
             curr_num->next = NULL;
@@ -111,7 +239,7 @@ double **read_from_file(FILE *file, int ND[2])
         if (curr_num->next == NULL)
         {
             fclose(file);
-            error_alloc(head_vec);
+            error_alloc_link(head_vec);
         }
         curr_num = curr_num->next;
         curr_num->next = NULL;
@@ -147,13 +275,13 @@ double **mat_from_linked(VECTOR *head_vec, int n, int d)
     rows = (double *)calloc(n * d, sizeof(double));
     if (rows == NULL)
     {
-        error_alloc(head_vec);
+        error_alloc_link(head_vec);
     }
     data = (double **)calloc(n, sizeof(double *));
     if (data == NULL)
     {
         free(rows);
-        error_alloc(head_vec);
+        error_alloc_link(head_vec);
     }
     for (i = 0; i < n; i++)
     {
@@ -210,11 +338,30 @@ void free_linked_mem(VECTOR *head_vec)
 }
 
 
-void error_alloc(VECTOR *head_vec)
+double similarity_calc(double *vector1, double *vector2, int d)
+{
+    double sum = 0;
+    int i;
+    for (i = 0; i < d; i++)
+    {
+        sum += pow((vector1[i] - vector2[i]), 2);
+    }
+    return exp(-sum/2);
+}
+
+
+void error_alloc_link(VECTOR *head_vec)
 {
     free_linked_mem(head_vec);
     printf("An Error Has Occurred\n");
     exit(1);
+}
+
+
+void free_mat_alloc(double **data)
+{
+    free(data[0]);
+    free(data);
 }
 
 
@@ -226,4 +373,19 @@ void print_matrix(double **mat, int rows, int cols){
         }
         printf("\n");
     }
+}
+
+
+double sum_of_vector(double *vector, int d){
+    int i;
+    double sum = 0;
+    for (i = 0; i < d; i++){
+        sum += vector[i];
+    }
+    return sum;
+}
+
+
+double **pow_diag_matrix(double** diag, int rows, int cols, int power){
+    
 }
