@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <symmnf.h>
 #define EPSILON 0.0001
 #define MAX_ITER 300
 
@@ -46,8 +47,7 @@ int main(int argc, char *argv[])
     int ND[2];
     int n, d;
     char *goal;
-    double **data;
-    double **sym_mat, **ddg_mat, **norm_mat;
+    double **data, **sym_mat, **ddg_mat, **norm_mat;;
     if (argc != 3)
     {
         printf("An Error Has Occurred\n");
@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
     if (strcmp(goal, "sym") == 0)
     { /* prints sym matrix*/
         print_matrix(sym_mat, n, n);
+        free_all_mat(data, sym_mat, NULL, NULL, 2, 0);
     }
     else if (strcmp(goal, "ddg") == 0 || strcmp(goal, "norm") == 0)
     {
@@ -83,6 +84,7 @@ int main(int argc, char *argv[])
         if (strcmp(goal, "ddg") == 0)
         {
             print_matrix(ddg_mat, n, n);
+            free_all_mat(data, sym_mat, ddg_mat, NULL, 3, 0);
         }
         else
         {
@@ -92,8 +94,10 @@ int main(int argc, char *argv[])
                 free_all_mat(data, sym_mat, ddg_mat, NULL, 3, 1);
             }
             print_matrix(norm_mat, n, n);
+            free_all_mat(data, sym_mat, ddg_mat, norm_mat, 4, 0);
         }
     }
+    /* free everything */
     return 0;
 }
 
@@ -102,10 +106,6 @@ double **symmnf(double **init_H, double **norm_mat, int n, int k)
     double **result;
 
     result = final_H(init_H, norm_mat, n, k);
-    if (result == NULL)
-    {
-        free_all_mat(init_H, norm_mat, NULL, NULL, 2, 1);
-    }
 
     return result;
 }
@@ -121,12 +121,20 @@ double **final_H(double **init_H, double **norm_mat, int n, int k)
         new_H = update_H(curr_H, norm_mat, n, k);
         if (new_H == NULL)
         {
+            if (curr_iter != 0){
+                /* edge case, we dont want to free init_H */
+                free_mat_alloc(curr_H);
+            }
             return NULL;
         }
 
         sub_H = subtract_mat(new_H, curr_H, n, k);
         if (sub_H == NULL)
         {
+            if (curr_iter != 0){
+                /* edge case, we dont want to free init_H */
+                free_mat_alloc(curr_H);
+            }
             free_mat_alloc(new_H);
             return NULL;
         }
@@ -134,7 +142,14 @@ double **final_H(double **init_H, double **norm_mat, int n, int k)
         forb_dist = forb_norm(sub_H, n, k);
 
         /* every iteration, free old H, and free subtraction matrix */
-        free_all_mat(curr_H, sub_H, NULL, NULL, 2, 0);
+        if (curr_iter == 0){
+            /* edge case, we dont want to free init_H */
+            free_mat_alloc(sub_H);
+        }
+        else{
+            free_all_mat(curr_H, sub_H, NULL, NULL, 2, 0);
+        }
+        
         curr_H = new_H;
 
         if (forb_dist < EPSILON)
@@ -337,12 +352,8 @@ double **norm(int n, double **sym_mat, double **ddg_mat)
         return NULL;
     }
     final_norm_mat = matrix_multi(norm_mat, new_d, n, n, n);
-    if (final_norm_mat == NULL)
-    {
-        free_mat_alloc(new_d);
-        free_mat_alloc(norm_mat);
-        return NULL;
-    }
+    free_mat_alloc(new_d);
+    free_mat_alloc(norm_mat);
     return final_norm_mat;
 }
 
