@@ -366,6 +366,7 @@ double **read_from_file(char *file_name, int ND[2])
     int rows = 0, elements = 0;
     double num;
     char c;
+    prev_vec = NULL;
     file = fopen(file_name, "r");
     if (file == NULL)
     {

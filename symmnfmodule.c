@@ -3,13 +3,17 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <symmnf.h>
+#include "symmnf.h"
 #include <Python.h>
+
+static double **pyobj_to_mat(PyObject *, int , int);
+static PyObject *mat_to_pyobj(double **, int , int);
+static double **get_mat_by_goal(char *, double **, int , int);
 
 static PyObject *sym_wrapper(PyObject *self, PyObject *args)
 {
     PyObject *data_pyobj, *sym_mat_pyobj;
-    int rows, cols, i, j;
+    int rows, cols;
     double **sym_mat, **data;
     char *goal;
 
@@ -21,7 +25,7 @@ static PyObject *sym_wrapper(PyObject *self, PyObject *args)
     }
 
     rows = PyObject_Length(data_pyobj);
-    cols = PyOnject_length(PyList_GetItem(data_pyobj, 0));
+    cols = PyObject_Length(PyList_GetItem(data_pyobj, 0));
 
     data = pyobj_to_mat(data_pyobj, rows, cols);
     if (data == NULL)
@@ -48,7 +52,7 @@ static PyObject *sym_wrapper(PyObject *self, PyObject *args)
 static PyObject *ddg_wrapper(PyObject *self, PyObject *args)
 {
     PyObject *data_pyobj, *ddg_mat_pyobj;
-    int rows, cols, i, j;
+    int rows, cols;
     double **data, **ddg_mat;
     char *goal;
 
@@ -60,7 +64,7 @@ static PyObject *ddg_wrapper(PyObject *self, PyObject *args)
     }
 
     rows = PyObject_Length(data_pyobj);
-    cols = PyOnject_length(PyList_GetItem(data_pyobj, 0));
+    cols = PyObject_Length(PyList_GetItem(data_pyobj, 0));
 
     data = pyobj_to_mat(data_pyobj, rows, cols);
     if (data == NULL)
@@ -86,7 +90,7 @@ static PyObject *ddg_wrapper(PyObject *self, PyObject *args)
 static PyObject *norm_wrapper(PyObject *self, PyObject *args)
 {
     PyObject *data_pyobj, *norm_mat_pyobj;
-    int rows, cols, i, j;
+    int rows, cols;
     double **data, **norm_mat;
     char *goal;
 
@@ -98,7 +102,7 @@ static PyObject *norm_wrapper(PyObject *self, PyObject *args)
     }
 
     rows = PyObject_Length(data_pyobj);
-    cols = PyOnject_length(PyList_GetItem(data_pyobj, 0));
+    cols = PyObject_Length(PyList_GetItem(data_pyobj, 0));
 
     data = pyobj_to_mat(data_pyobj, rows, cols);
     if (data == NULL)
@@ -125,7 +129,7 @@ static PyObject *symmnf_wrapper(PyObject *self, PyObject *args)
 {
     PyObject *initial_H_pyobj, *final_H_pyobj, *norm_mat_pyobj;
     double **initial_H, **norm_mat, **final_H;
-    int rows, k, i, j;
+    int rows, k;
 
     if (!PyArg_ParseTuple(args, "OO", &initial_H_pyobj, &norm_mat_pyobj))
     {
@@ -135,7 +139,7 @@ static PyObject *symmnf_wrapper(PyObject *self, PyObject *args)
     }
 
     rows = PyObject_Length(initial_H_pyobj);
-    k = PyOnject_length(PyList_GetItem(initial_H_pyobj, 0));
+    k = PyObject_Length(PyList_GetItem(initial_H_pyobj, 0));
 
     initial_H = pyobj_to_mat(initial_H_pyobj, rows, k);
     if (initial_H == NULL)
@@ -233,7 +237,7 @@ static double **pyobj_to_mat(PyObject *data_pyobj, int rows, int cols)
 
 static PyObject *mat_to_pyobj(double **mat, int rows, int cols)
 {
-    PyObject *outer_list, *inner_list, list_value;
+    PyObject *outer_list, *inner_list, *list_value;
     int i, j;
 
     /* parse a 2d array to 2d list pyobject */
@@ -244,10 +248,11 @@ static PyObject *mat_to_pyobj(double **mat, int rows, int cols)
         for (j = 0; j < cols; j++)
         {
             list_value = PyFloat_FromDouble(mat[i][j]);
-            PyList_Set_Item(inner_list, j, list_value);
+            PyList_SetItem(inner_list, j, list_value);
         }
-        PyList_Set_Item(outer_list, i, inner_list);
+        PyList_SetItem(outer_list, i, inner_list);
     }
+    return outer_list;
 }
 
 static double **get_mat_by_goal(char *goal, double **data, int n, int d)
@@ -284,4 +289,5 @@ static double **get_mat_by_goal(char *goal, double **data, int n, int d)
             return norm_mat;
         }
     }
+    return NULL;
 }
