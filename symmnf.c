@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <symmnf.h>
+#include "symmnf.h" /*TODO: check with nadav*/
 #define EPSILON 0.0001
 #define MAX_ITER 300
 
