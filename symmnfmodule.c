@@ -121,8 +121,8 @@ static PyObject *norm_wrapper(PyObject *self, PyObject *args)
     return norm_mat_pyobj;
 }
 
-
-static PyObject *symmnf_wrapper(PyObject *self, PyObject *args){
+static PyObject *symmnf_wrapper(PyObject *self, PyObject *args)
+{
     PyObject *initial_H_pyobj, *final_H_pyobj, *norm_mat_pyobj;
     double **initial_H, **norm_mat, **final_H;
     int rows, k, i, j;
@@ -138,20 +138,23 @@ static PyObject *symmnf_wrapper(PyObject *self, PyObject *args){
     k = PyOnject_length(PyList_GetItem(initial_H_pyobj, 0));
 
     initial_H = pyobj_to_mat(initial_H_pyobj, rows, k);
-    if (initial_H == NULL){
+    if (initial_H == NULL)
+    {
         printf("An Error Has Occurred\n");
         return NULL;
     }
 
     norm_mat = pyobj_to_mat(norm_mat_pyobj, rows, rows);
-    if (norm_mat == NULL){
+    if (norm_mat == NULL)
+    {
         free_mat_alloc(initial_H);
         printf("An Error Has Occurred\n");
         return NULL;
     }
 
     final_H = symmnf(initial_H, norm_mat, rows, k);
-    if (final_H == NULL){
+    if (final_H == NULL)
+    {
         free_all_mat(initial_H, norm_mat, NULL, NULL, 2, 0);
         printf("An Error Has Occurred\n");
         return NULL;
@@ -161,6 +164,45 @@ static PyObject *symmnf_wrapper(PyObject *self, PyObject *args){
     free_all_mat(initial_H, norm_mat, final_H, NULL, 3, 0);
 
     return final_H_pyobj;
+}
+static PyMethodDef symmnf_FunctionsTable[] = {
+    {
+        "sym",                  // name exposed to Python
+        sym_wrapper,            // C wrapper function
+        METH_VARARGS,           // received variable args (but really just 1)
+        "Excecute sym function" // documentation
+    },
+    {
+        "ddg",                  // name exposed to Python
+        ddg_wrapper,            // C wrapper function
+        METH_VARARGS,           // received variable args (but really just 1)
+        "Excecute ddg function" // documentation
+    },
+    {
+        "norm",                  // name exposed to Python
+        norm_wrapper,            // C wrapper function
+        METH_VARARGS,            // received variable args (but really just 1)
+        "Excecute norm function" // documentation
+    },
+    {
+        "symmnf",               // name exposed to Python
+        symmnf_wrapper,         // C wrapper function
+        METH_VARARGS,           // received variable args (but really just 1)
+        "Excecute ddg function" // documentation
+    },
+
+    {NULL, NULL, 0, NULL}};
+
+static struct PyModuleDef symmnf_Module = {
+    PyModuleDef_HEAD_INIT,
+    "symmnf",                                    // name of module exposed to Python
+    "C implementation of the symmnf algorithm.", // module documentation
+    -1,
+    symmnf_FunctionsTable};
+
+PyMODINIT_FUNC PyInit_symmnf(void)
+{
+    return PyModule_Create(&symmnf_Module);
 }
 
 static double **pyobj_to_mat(PyObject *data_pyobj, int rows, int cols)
