@@ -1,7 +1,7 @@
 # ifndef LINKER_H_
 # define LINKER_H_
 
-double **symmnf(double **init_H, double **norm_mat, int n, int k);
+double **symnmf(double **init_H, double **norm_mat, int n, int k);
 double **sym(double **data, int n, int d);
 double **ddg(double **sym_mat, int n);
 double **norm(int n, double **sym_mat, double **ddg_mat);

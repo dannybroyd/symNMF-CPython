@@ -54,6 +54,15 @@ def action_by_goal(k, goal, filename):
         print_mat(final_h_mat)
 
 
+def analysis(k, filename):
+    datapoints = get_datapoints(filename)
+    norm_mat = symmnf.norm(datapoints)
+    h_mat = init_H(norm_mat, k)
+    final_h_mat = symmnf.symmnf(h_mat, norm_mat)
+    matrix_array = np.array(final_h_mat)
+    max_indices = np.argmax(matrix_array, axis=1)   # Use argmax along axis 1 to get the index of the maximum value in each row
+    return max_indices.tolist(), datapoints
+
 def print_mat(mat):
     for vector in mat:
         for i in range(len(vector)-1):

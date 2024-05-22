@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include "symmnf.h"
+#include "symnmf.h"
 #include <Python.h>
 
 static double **pyobj_to_mat(PyObject *, int , int);
@@ -127,7 +127,7 @@ static PyObject *norm_wrapper(PyObject *self, PyObject *args)
     return norm_mat_pyobj;
 }
 
-static PyObject *symmnf_wrapper(PyObject *self, PyObject *args)
+static PyObject *symnmf_wrapper(PyObject *self, PyObject *args)
 {
     PyObject *initial_H_pyobj, *final_H_pyobj, *norm_mat_pyobj;
     double **initial_H, **norm_mat, **final_H;
@@ -158,7 +158,7 @@ static PyObject *symmnf_wrapper(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    final_H = symmnf(initial_H, norm_mat, rows, k);
+    final_H = symnmf(initial_H, norm_mat, rows, k);
     if (final_H == NULL)
     {
         free_all_mat(initial_H, norm_mat, NULL, NULL, 2, 0);
@@ -171,7 +171,7 @@ static PyObject *symmnf_wrapper(PyObject *self, PyObject *args)
 
     return final_H_pyobj;
 }
-static PyMethodDef symmnf_FunctionsTable[] = {
+static PyMethodDef symnmf_FunctionsTable[] = {
     {
         "sym",                  // name exposed to Python
         sym_wrapper,            // C wrapper function
@@ -191,24 +191,24 @@ static PyMethodDef symmnf_FunctionsTable[] = {
         "Excecute norm function" // documentation
     },
     {
-        "symmnf",               // name exposed to Python
-        symmnf_wrapper,         // C wrapper function
+        "symnmf",               // name exposed to Python
+        symnmf_wrapper,         // C wrapper function
         METH_VARARGS,           // received variable args (but really just 1)
         "Excecute ddg function" // documentation
     },
 
     {NULL, NULL, 0, NULL}};
 
-static struct PyModuleDef symmnf_Module = {
+static struct PyModuleDef symnmf_Module = {
     PyModuleDef_HEAD_INIT,
-    "symmnf",                                    // name of module exposed to Python
-    "C implementation of the symmnf algorithm.", // module documentation
+    "symnmf",                                    // name of module exposed to Python
+    "C implementation of the symnmf algorithm.", // module documentation
     -1,
-    symmnf_FunctionsTable};
+    symnmf_FunctionsTable};
 
-PyMODINIT_FUNC PyInit_symmnf(void)
+PyMODINIT_FUNC PyInit_symnmf(void)
 {
-    return PyModule_Create(&symmnf_Module);
+    return PyModule_Create(&symnmf_Module);
 }
 
 static double **pyobj_to_mat(PyObject *data_pyobj, int rows, int cols)
