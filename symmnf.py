@@ -16,7 +16,7 @@ def main():
 def init_H(norm_mat, k):
     average = np.mean(np.array(norm_mat))
     top_interval = 2 * math.sqrt(average/k)
-    h_mat = np.random.uniform(0, top_interval, len(norm_mat), k)
+    h_mat = np.random.uniform(0, top_interval, (len(norm_mat), k))
     return h_mat.tolist()
 
 
@@ -60,4 +60,7 @@ def print_mat(mat):
             print('%.4f' % vector[i], end=",")
         print('%.4f' % vector[len(vector) - 1])
 
+
+if __name__ == "__main__":
+    main()
 

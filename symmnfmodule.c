@@ -9,6 +9,8 @@
 static double **pyobj_to_mat(PyObject *, int , int);
 static PyObject *mat_to_pyobj(double **, int , int);
 static double **get_mat_by_goal(char *, double **, int , int);
+/*TODO:DELETE*/
+void print_matrix_test(double **, int , int );
 
 static PyObject *sym_wrapper(PyObject *self, PyObject *args)
 {
@@ -284,10 +286,26 @@ static double **get_mat_by_goal(char *goal, double **data, int n, int d)
         }
         else
         {
+            /* goal == norm */
             norm_mat = norm(n, sym_mat, ddg_mat);
             free_all_mat(sym_mat, ddg_mat, NULL, NULL, 2, 0);
             return norm_mat;
         }
     }
     return NULL;
+}
+
+/*TODO: DELETEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE*/
+void print_matrix_test(double **mat, int rows, int cols)
+{
+    int i, j;
+    for (i = 0; i < rows; i++)
+    {
+        for (j = 0; j < cols - 1; j++)
+        {
+            printf("%.4f,", mat[i][j]);
+        }
+        printf("%.4f", mat[i][j]);
+        printf("\n");
+    }
 }
