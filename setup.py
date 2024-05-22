@@ -1,11 +1,11 @@
 from setuptools import Extension, setup
 
-module = Extension("symmnf",
+module = Extension("symnmf",
                   sources=[
-                    'symmnf.c',
-                    'symmnfmodule.c'
+                    'symnmf.c',
+                    'symnmfmodule.c'
                   ])
-setup(name='symmnf',
+setup(name='symnmf',
      version='1.0',
-     description='C extension for symmnf',
+     description='C extension for symnmf',
      ext_modules=[module])

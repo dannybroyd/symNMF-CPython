@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "symmnf.h" /*TODO: check with nadav*/
+#include "symnmf.h" /*TODO: check with nadav*/
 #define EPSILON 0.0001
 #define MAX_ITER 300
 
@@ -38,7 +38,7 @@ double **transpose_mat(double **, int, int);
 double forb_norm(double **, int, int);
 double **alloc_mat(int, int);
 double **subtract_mat(double **, double **, int, int);
-double **symmnf(double **, double **, int, int);
+double **symnmf(double **, double **, int, int);
 /* TODO: DELETE TESTER!!!!!*/
 void tester(double **, int, int);
 
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-double **symmnf(double **init_H, double **norm_mat, int n, int k)
+double **symnmf(double **init_H, double **norm_mat, int n, int k)
 {
     double **result;
 
@@ -595,7 +595,7 @@ double **pow_diag_matrix(double **diag, int n)
         {
             if (i == j)
             {
-                result[i][j] = 1 / (sqrt(diag[i][j]));
+                result[i][j] =  pow(diag[i][j],-0.5);
             }
             else
             {
