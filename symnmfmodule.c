@@ -9,8 +9,7 @@
 static double **pyobj_to_mat(PyObject *, int , int);
 static PyObject *mat_to_pyobj(double **, int , int);
 static double **get_mat_by_goal(char *, double **, int , int);
-/*TODO:DELETE*/
-void print_matrix_test(double **, int , int );
+
 
 static PyObject *sym_wrapper(PyObject *self, PyObject *args)
 {
@@ -194,25 +193,26 @@ static PyMethodDef symnmf_FunctionsTable[] = {
         "symnmf",               // name exposed to Python
         symnmf_wrapper,         // C wrapper function
         METH_VARARGS,           // received variable args (but really just 1)
-        "Excecute ddg function" // documentation
+        "Excecute symnmf function" // documentation
     },
 
     {NULL, NULL, 0, NULL}};
 
 static struct PyModuleDef symnmf_Module = {
     PyModuleDef_HEAD_INIT,
-    "symnmf",                                    // name of module exposed to Python
+    "symnmfmodule",                                    // name of module exposed to Python
     "C implementation of the symnmf algorithm.", // module documentation
     -1,
     symnmf_FunctionsTable};
 
-PyMODINIT_FUNC PyInit_symnmf(void)
+PyMODINIT_FUNC PyInit_symnmfmodule(void)
 {
     return PyModule_Create(&symnmf_Module);
 }
 
 static double **pyobj_to_mat(PyObject *data_pyobj, int rows, int cols)
 {
+    /* this parses pyobject to 2d array(matrix) in C */
     double **mat;
     int i, j;
     PyObject *data_pyobj_row, *item_in_data_pyobj;
@@ -223,7 +223,7 @@ static double **pyobj_to_mat(PyObject *data_pyobj, int rows, int cols)
         return NULL;
     }
 
-    /* this parses pyobject to 2d array(matrix) */
+    
     for (i = 0; i < rows; i++)
     {
         data_pyobj_row = PyList_GetItem(data_pyobj, i);
@@ -239,10 +239,10 @@ static double **pyobj_to_mat(PyObject *data_pyobj, int rows, int cols)
 
 static PyObject *mat_to_pyobj(double **mat, int rows, int cols)
 {
+    /* parse a 2d array in C to 2d list pyobject */
     PyObject *outer_list, *inner_list, *list_value;
     int i, j;
-
-    /* parse a 2d array to 2d list pyobject */
+    
     outer_list = PyList_New(rows);
     for (i = 0; i < rows; i++)
     {
@@ -259,6 +259,7 @@ static PyObject *mat_to_pyobj(double **mat, int rows, int cols)
 
 static double **get_mat_by_goal(char *goal, double **data, int n, int d)
 {
+    /* perform the goal function on the data matrix */
     double **sym_mat, **ddg_mat, **norm_mat;
 
     sym_mat = sym(data, n, d);
@@ -293,19 +294,4 @@ static double **get_mat_by_goal(char *goal, double **data, int n, int d)
         }
     }
     return NULL;
-}
-
-/*TODO: DELETEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE*/
-void print_matrix_test(double **mat, int rows, int cols)
-{
-    int i, j;
-    for (i = 0; i < rows; i++)
-    {
-        for (j = 0; j < cols - 1; j++)
-        {
-            printf("%.4f,", mat[i][j]);
-        }
-        printf("%.4f", mat[i][j]);
-        printf("\n");
-    }
 }

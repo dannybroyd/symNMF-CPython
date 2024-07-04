@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "symnmf.h" /*TODO: check with nadav*/
+#include "symnmf.h" 
 #define EPSILON 0.0001
 #define MAX_ITER 300
 
@@ -39,11 +39,10 @@ double forb_norm(double **, int, int);
 double **alloc_mat(int, int);
 double **subtract_mat(double **, double **, int, int);
 double **symnmf(double **, double **, int, int);
-/* TODO: DELETE TESTER!!!!!*/
-void tester(double **, int, int);
 
 int main(int argc, char *argv[])
 {
+    /* gets arguments from system, and performs the required goal, as instructed */
     int ND[2];
     int n, d;
     char *goal;
@@ -61,12 +60,6 @@ int main(int argc, char *argv[])
     if (sym_mat == NULL)
     {
         free_all_mat(data, NULL, NULL, NULL, 1, 1);
-    }
-
-    /* TODO: THIS IS A TEST, DELETE LATER */
-    if (strcmp(goal, "test") == 0)
-    {
-        tester(data, n, d);
     }
 
     if (strcmp(goal, "sym") == 0)
@@ -97,12 +90,12 @@ int main(int argc, char *argv[])
             free_all_mat(data, sym_mat, ddg_mat, norm_mat, 4, 0);
         }
     }
-    /* free everything */
     return 0;
 }
 
 double **symnmf(double **init_H, double **norm_mat, int n, int k)
 {
+    /* returns the final H matrix after the symnmf algorithm */
     double **result;
 
     result = final_H(init_H, norm_mat, n, k);
@@ -112,6 +105,7 @@ double **symnmf(double **init_H, double **norm_mat, int n, int k)
 
 double **final_H(double **init_H, double **norm_mat, int n, int k)
 {
+    /* Calculates final_H matrix by updating H until convergence or MAX_ITER */
     int curr_iter;
     double **new_H, **curr_H, forb_dist, **sub_H;
     curr_H = init_H;
@@ -162,6 +156,7 @@ double **final_H(double **init_H, double **norm_mat, int n, int k)
 
 double **update_H(double **curr_H, double **norm_mat, int n, int k)
 {
+    /* updates H matrix using the method in the instructions */
     double **numerator;   /* this is W*H(t) */
     double **denominator; /* this is H*(H^T)*H */
     double **H_transpose, **temp_mat;
@@ -175,7 +170,7 @@ double **update_H(double **curr_H, double **norm_mat, int n, int k)
         return NULL;
     }
 
-    numerator = matrix_multi(norm_mat, curr_H, n, n, k);
+    numerator = matrix_multi(norm_mat, curr_H, n, n, k); 
     if (numerator == NULL)
     {
         free_all_mat(updated_H, NULL, NULL, NULL, 1, 0);
@@ -219,6 +214,7 @@ double **update_H(double **curr_H, double **norm_mat, int n, int k)
 
 double **transpose_mat(double **mat, int m, int n)
 {
+    /* returns the transposed matrix */
     double **transposed_mat;
     int i, j;
 
@@ -240,6 +236,7 @@ double **transpose_mat(double **mat, int m, int n)
 
 double forb_norm(double **mat, int m, int n)
 {
+    /* returns the frobenius norm of the matrix */
     double result;
     int i, j;
 
@@ -257,6 +254,7 @@ double forb_norm(double **mat, int m, int n)
 
 double **subtract_mat(double **mat_1, double **mat_2, int m, int n)
 {
+    /* returns the subtraction of two matrices */
     double **result;
     int i, j;
 
@@ -279,6 +277,7 @@ double **subtract_mat(double **mat_1, double **mat_2, int m, int n)
 
 double **sym(double **data, int n, int d)
 {
+    /* Calculates sym mat with similarity calculation, as instructed */
     double **sym_mat;
     int i, j;
 
@@ -308,6 +307,7 @@ double **sym(double **data, int n, int d)
 
 double **ddg(double **sym_mat, int n)
 {
+    /* Calculates ddg mat, as instructed */
     double **ddg_mat;
     int i, j;
 
@@ -337,6 +337,7 @@ double **ddg(double **sym_mat, int n)
 
 double **norm(int n, double **sym_mat, double **ddg_mat)
 {
+    /* Calculates norm mat, as instructed */
     double **norm_mat, **new_d, **final_norm_mat;
     /* calculate the D^-0.5 */
     new_d = pow_diag_matrix(ddg_mat, n);
@@ -359,6 +360,7 @@ double **norm(int n, double **sym_mat, double **ddg_mat)
 
 double **read_from_file(char *file_name, int ND[2])
 {
+    /* Reads from file, and returns the data in a matrix (using Linked List struct but returns a matrix) */
     VECTOR *head_vec, *curr_vec, *prev_vec;
     NUM *head_num, *curr_num;
     FILE *file;
@@ -447,6 +449,7 @@ double **read_from_file(char *file_name, int ND[2])
     ND[1] = elements / rows;
     /* Close the file*/
     fclose(file);
+    /* Convert the linked list to a matrix */
     data = mat_from_linked(head_vec, ND[0], ND[1]);
     free_linked_mem(head_vec);
     return data;
@@ -454,6 +457,7 @@ double **read_from_file(char *file_name, int ND[2])
 
 double **mat_from_linked(VECTOR *head_vec, int n, int d)
 {
+    /* Converts the linked list to a matrix */
     double **data;
     double *rows;
     int i, j;
@@ -496,6 +500,7 @@ double **mat_from_linked(VECTOR *head_vec, int n, int d)
 
 void free_linked_mem(VECTOR *head_vec)
 {
+    /* Frees the linked list memory */
     NUM *curr_num;
     NUM *next_num;
     VECTOR *next_vec;
@@ -530,6 +535,7 @@ void free_linked_mem(VECTOR *head_vec)
 
 double similarity_calc(double *vector1, double *vector2, int d)
 {
+    /* Calculates the similarity between two vectors */
     double sum = 0;
     int i;
     for (i = 0; i < d; i++)
@@ -541,6 +547,7 @@ double similarity_calc(double *vector1, double *vector2, int d)
 
 void error_alloc_link(VECTOR *head_vec)
 {
+    /* Frees the linked list memory in case of error, prints an error message and exits the program */
     free_linked_mem(head_vec);
     printf("An Error Has Occurred\n");
     exit(1);
@@ -548,12 +555,14 @@ void error_alloc_link(VECTOR *head_vec)
 
 void free_mat_alloc(double **data)
 {
+    /* Frees the matrix memory (a continous block in memory) */
     free(data[0]);
     free(data);
 }
 
 void print_matrix(double **mat, int rows, int cols)
 {
+    /* Prints the matrix with the valid formatting */
     int i, j;
     for (i = 0; i < rows; i++)
     {
@@ -568,6 +577,7 @@ void print_matrix(double **mat, int rows, int cols)
 
 double sum_of_vector(double *vector, int d)
 {
+    /* Calculates the sum of a vector */
     int i;
     double sum = 0;
     for (i = 0; i < d; i++)
@@ -579,6 +589,7 @@ double sum_of_vector(double *vector, int d)
 
 double **pow_diag_matrix(double **diag, int n)
 {
+    /* Calculates the D^-0.5 matrix */
     int i, j;
     double **result;
 
@@ -608,6 +619,7 @@ double **pow_diag_matrix(double **diag, int n)
 
 void free_all_mat(double **mat_1, double **mat_2, double **mat_3, double **mat_4, int n, int error_flag)
 {
+    /* Helper function to free multiple matrices (can recieve 1-4 matrices), will print error and exit if specified by error_flag */
     if (n > 0)
     {
         free_mat_alloc(mat_1);
@@ -633,6 +645,7 @@ void free_all_mat(double **mat_1, double **mat_2, double **mat_3, double **mat_4
 
 double **matrix_multi(double **mat_1, double **mat_2, int m, int n_1, int n)
 {
+    /* returns the multiplication of two matrices */
     /* m is rows of mat_1, n_1 is cols of mat_1(and rows of mat_2), n is cols of mat_2*/
     double **result;
     int i, j, k;
@@ -660,6 +673,7 @@ double **matrix_multi(double **mat_1, double **mat_2, int m, int n_1, int n)
 
 double **alloc_mat(int m, int n)
 {
+    /* returns a matrix with m rows and n cols, after continous memory allocation */
     double **mat, *rows;
     int i;
 
@@ -683,28 +697,3 @@ double **alloc_mat(int m, int n)
     return mat;
 }
 
-void tester(double **data, int n, int d)
-{
-    double **transposed_mat, **sub_mat, **multi_mat, norm;
-    printf("Original Matrix: \n");
-    print_matrix(data, n, d);
-    printf("\n");
-
-    transposed_mat = transpose_mat(data, n, d);
-    printf("Transpose Matrix: \n");
-    print_matrix(transposed_mat, d, n);
-    printf("\n");
-
-    multi_mat = matrix_multi(data, transposed_mat, n, d, n);
-    printf("Multi Matrix: \n");
-    print_matrix(multi_mat, n, n);
-    printf("\n");
-
-    sub_mat = subtract_mat(data, data, n, d);
-    printf("Sub Matrix: \n");
-    print_matrix(sub_mat, n, n);
-    printf("\n");
-
-    norm = forb_norm(data, n, d);
-    printf("norm: %f\n", norm);
-}
